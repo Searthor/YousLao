@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:yous_app/pages/home_page.dart';
 import 'package:yous_app/routes.dart';
 import 'package:yous_app/states/app_colors.dart';
 
@@ -14,9 +15,8 @@ class _SplashState extends State<Splash> {
   int changeSize = 0;
   AppColors appColor = AppColors();
   @override
-   void initState() {
+  void initState() {
     super.initState();
-
     initSplash();
   }
 
@@ -32,11 +32,16 @@ class _SplashState extends State<Splash> {
         });
       });
     }).then((value) async {
-      await Future.delayed(const Duration(milliseconds: 1500)).then((value) {
-        Get.offNamed(Routes.home);
+      await Future.delayed(const Duration(milliseconds: 500))
+          .then((value) async {
+        Get.off(
+          () => HomePage(),
+          transition: Transition.rightToLeft,
+        );
       });
     });
   }
+
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     double fixSize = size.width + size.height;
@@ -61,9 +66,7 @@ class _SplashState extends State<Splash> {
           Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Center(
-                  child: Text('1.0.1')
-              ),
+              Center(child: Text('1.0.1')),
             ],
           )
         ],

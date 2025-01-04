@@ -3,11 +3,11 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:yous_app/models/repository.dart';
+import 'package:yous_app/states/history_state.dart';
 import 'package:yous_app/states/slide_controller.dart';
 
 class HomeSlider extends StatefulWidget {
   const HomeSlider({super.key});
-
   @override
   _HomeSliderState createState() => _HomeSliderState();
 }
@@ -25,8 +25,8 @@ class _HomeSliderState extends State<HomeSlider> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      if (slideController.isLoading.value) {
+    return GetBuilder<SlideController>(builder: (get) {
+      if (get.isLoading) {
         return Center(
           child: Shimmer.fromColors(
             baseColor: const Color.fromARGB(255, 255, 255, 255),
@@ -41,71 +41,69 @@ class _HomeSliderState extends State<HomeSlider> {
             ),
           ),
         );
-      }
-
-      if (slideController.slidedata.isEmpty) {
+      } else if (get.slidedata.isEmpty) {
         return Image.asset(
           'assets/bg.png', // Path to your default image
           fit: BoxFit.cover,
           width: double.infinity,
           height: 120,
         );
-      }
-
-      return Column(
-        children: [
-          CarouselSlider(
-            items: slideController.slidedata
-                .map(
-                  (slide) => Image.network(
-                    Repository().urlApi + slide.image.toString(),
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        'assets/bg.png', // Path to your default image
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: 120,
-                      );
-                    },
-                  ),
-                )
-                .toList(),
-            options: CarouselOptions(
-              autoPlay: true,
-              autoPlayCurve: Curves.fastOutSlowIn,
-              autoPlayAnimationDuration: const Duration(milliseconds: 800),
-              autoPlayInterval: const Duration(seconds: 5),
-              enlargeCenterPage: true,
-              height: 150,
-              onPageChanged: (index, reason) {
-                setState(() {
-                  myCurrentIndex = index;
-                });
-              },
+      } else {
+        return Column(
+          children: [
+            CarouselSlider(
+              items: get.slidedata
+                  .map(
+                    (slide) => Image.network(
+                      Repository().urlApi + slide.image.toString(),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          'assets/bg.png', // Path to your default image
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: 120,
+                        );
+                      },
+                    ),
+                  )
+                  .toList(),
+              options: CarouselOptions(
+                autoPlay: true,
+                autoPlayCurve: Curves.fastOutSlowIn,
+                autoPlayAnimationDuration: const Duration(milliseconds: 800),
+                autoPlayInterval: const Duration(seconds: 5),
+                enlargeCenterPage: true,
+                height: 150,
+                onPageChanged: (index, reason) {
+                  setState(() {
+                    myCurrentIndex = index;
+                  });
+                },
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              slideController.slidedata.length,
-              (index) => Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: myCurrentIndex == index
-                      ? Colors.blue
-                      : Colors.grey.withOpacity(0.5),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                get.slidedata.length,
+                (index) => Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: myCurrentIndex == index
+                        ? Colors.blue
+                        : Colors.grey.withOpacity(0.5),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      );
+          ],
+        );
+      }
     });
   }
 }

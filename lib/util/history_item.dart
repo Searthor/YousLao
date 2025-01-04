@@ -30,7 +30,8 @@ class HistoryItem extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () {
-          Get.toNamed(Routes.historyDetail,arguments: HistoryDetailPage(id: item.id));
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>HistoryDetailPage(id: item.id)));
+          // Get.toNamed(Routes.historyDetail,arguments: HistoryDetailPage(id: item.id));
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

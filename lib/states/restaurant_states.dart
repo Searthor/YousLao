@@ -7,8 +7,8 @@ import 'package:yous_app/models/repository.dart';
 import 'package:yous_app/pages/test.dart';
 
 class RestaurantState extends GetxController {
-  var restaurants = <AllRestaurantModel>[].obs;
-  var isLoading = true.obs;
+  List<AllRestaurantModel> restaurants = [];
+  var isLoading = true;
 
   Repository repository = Repository();
 
@@ -20,16 +20,18 @@ class RestaurantState extends GetxController {
 
   Future<void> fetchRestaurants() async {
     try {
-       isLoading.value = true;
+       isLoading = true;
       var res = await repository.get(url: repository.urlApi + repository.allrestaurant);
       if (res.statusCode == 200) {
         var data = jsonDecode(res.body) as List;
-        restaurants.value = data.map((json) => AllRestaurantModel.fromJson(json)).toList();
-        isLoading.value = false;
+        restaurants = data.map((json) => AllRestaurantModel.fromJson(json)).toList();
+        isLoading = false;
       }
+      update();
     } catch (e) {
-      isLoading.value = false;
+      isLoading = false;
       print('Failed to load restaurants: $e');
+      update();
     }
   }
  

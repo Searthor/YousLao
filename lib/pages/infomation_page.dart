@@ -8,6 +8,7 @@ import 'package:yous_app/states/pickImage_state.dart';
 import 'package:yous_app/states/profile_state.dart';
 import 'package:yous_app/util/constants.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:yous_app/util/profile_edit_loading.dart';
 import 'package:yous_app/util/profile_loading.dart';
 import 'dart:io';
 
@@ -87,7 +88,7 @@ class _InfomationPageState extends State<InfomationPage> {
         child: GetBuilder<ProfileState>(
           builder: (get) {
             if (get.isLoading) {
-              return ProfileLoading();
+              return ProfileEditLoading();
             }
             return RefreshIndicator(
               onRefresh: _refreshData,

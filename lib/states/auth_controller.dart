@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:yous_app/models/repository.dart';
 import 'package:yous_app/pages/cart_page.dart';
-import 'package:yous_app/pages/first_page.dart';
 import 'package:yous_app/pages/home_page.dart';
 import 'package:yous_app/pages/login_page.dart';
 import 'package:yous_app/pages/profile_page.dart';
-import 'package:yous_app/routes.dart';
+import 'package:yous_app/states/app_verification.dart';
 import 'dart:convert';
 import 'package:yous_app/widgets/custom_dialog.dart'; // Import to use jsonEncode
-
 class AuthController extends GetxController {
+  var isLoggedIn = false;
   Repository repository = Repository();
+  AppVerification appVerification = Get.put(AppVerification());
   Future<void> register(
       {required String phone,
       String? name,
@@ -33,8 +33,7 @@ class AuthController extends GetxController {
             text: 'register_success'.tr,
             color: Colors.white,
             backgroundColor: Colors.green);
-         Get.offNamed(Routes.login);
-
+        Get.offAll(() => LoginPage());
       } else if (res.statusCode == 400) {
         CustomDialog().showToast(
             text: 'phone_is_regiseted'.tr,
@@ -51,7 +50,6 @@ class AuthController extends GetxController {
     required String password,
     String? checkorder,
   }) async {
-    print(checkorder);
     try {
       var res = await repository.post(
         url: '${repository.urlApi}${repository.login}',
@@ -65,20 +63,24 @@ class AuthController extends GetxController {
           Get.back();
           return CustomDialog().showToast(text: 'something_went_wrong');
         } else {
-          await repository.appVerification.setNewToken(
+          await appVerification.setNewToken(
             text: jsonDecode(res.body)['token'],
           );
-
+           appVerification.setInitToken();
+           isLoggedIn = true; // Update the state here
+         
+         
           CustomDialog()
               .showToast(text: 'login_success'.tr, color: Colors.white);
           if (checkorder == 'order') {
             Get.back();
           } else {
             Get.to(
-              () => FirstPage(),
-              transition: Transition.rightToLeft,
+              () => HomePage(),
+              // transition: Transition.rightToLeft,
             );
           }
+          update();
         }
       } else {
         var jsonResponse = jsonDecode(res.body);
@@ -86,9 +88,11 @@ class AuthController extends GetxController {
             text: jsonResponse['message'],
             color: Colors.white,
             backgroundColor: Colors.red);
+        update();
       }
     } catch (e) {
       print(e);
+      update();
     }
   }
 
@@ -105,7 +109,10 @@ class AuthController extends GetxController {
             text: 'logout_success'.tr,
             color: Colors.white,
             backgroundColor: Colors.green);
-        Get.offAll(() => FirstPage());
+         Get.to(
+              () => HomePage(),
+              transition: Transition.rightToLeft,
+            );
       } else {
         throw res.body;
       }

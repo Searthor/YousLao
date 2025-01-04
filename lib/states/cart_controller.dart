@@ -7,23 +7,23 @@ import 'package:yous_app/models/repository.dart';
 import 'package:yous_app/pages/login_page.dart';
 import 'package:yous_app/pages/order_page.dart';
 import 'package:yous_app/states/scanner_state.dart';
+import 'package:yous_app/states/table_state.dart';
 import 'package:yous_app/widgets/custom_dialog.dart';
 
 class CartController extends GetxController {
-  var cartItems = <CartItem>[].obs;
-  var cartCount = 0.obs;
-  var cartPrice = 0.obs;
-  var isLoading = true.obs;
+  TableState tableState = Get.put(TableState());
+  List<CartItem> cartItems = [];
+  var cartCount = 0;
+  var cartPrice = 0;
+  var isLoading = true;
   final ScannerState scannerState = Get.put(ScannerState());
-
   Repository repository = Repository();
 
-  void addToCart(CartItem item) {
-    isLoading.value = true;
+  void addToCart(CartItem item,int qty) {
     int index = cartItems
         .indexWhere((cartItem) => cartItem.product.id == item.product.id);
     if (index != -1) {
-      cartItems[index].quantity++;
+      cartItems[index].quantity +=qty;
     } else {
       cartItems.add(item);
     }
@@ -32,41 +32,37 @@ class CartController extends GetxController {
         text: 'added_to_cart'.tr,
         color: Colors.white,
         backgroundColor: Colors.green);
-    isLoading.value = false;
+    update();
   }
 
   void removeFromCart(CartItem item) {
-    isLoading.value = true;
     cartItems.remove(item);
     getTotal();
-    isLoading.value = false;
+    update();
   }
 
   void removeItem(CartItem item) {
-    isLoading.value = true;
     cartItems.remove(item);
     getTotal();
-    isLoading.value = false;
+    update();
   }
 
   void clearCart() {
-    isLoading.value = true;
     cartItems.clear();
     getTotal();
-    isLoading.value = false;
+    update();
   }
 
   void updateQuantity(CartItem item, int quantity) {
-    isLoading.value = true;
     int index = cartItems.indexOf(item);
     if (index != -1 && quantity > 0) {
       cartItems[index].quantity = quantity;
-      cartItems.refresh();
+      // cartItems.refresh();
     } else if (quantity == 0) {
       removeItem(item);
     }
     getTotal();
-    isLoading.value = false;
+    update();
   }
 
   Future<void> createOrder(OrderModel orderModel) async {
@@ -84,11 +80,11 @@ class CartController extends GetxController {
         if (res.statusCode == 200) {
           var responseBody = jsonDecode(res.body); // Decode the JSON response
           int tableID = responseBody['tableID']; // Extract the tableID
+          // print(responseBody['orderdata']);
           int branchID = responseBody['tableID']; // Extract the tableID
-          scannerState
-              .gettablebyqr(tableID.toString()); // Pass tableID as a string
-          // int tableID = int.parse(res.body['tableID']);
-          // scannerState.gettablebyqr(tableID.toString());
+          int OrderID = responseBody['orderID']; // Extract the tableID
+          scannerState.gettablebyqr(tableID.toString()); 
+          tableState.orderID = OrderID.toString();
           clearCart();
           // Optionally show a success message
           CustomDialog().showToast(
@@ -109,20 +105,21 @@ class CartController extends GetxController {
               Checkorder: 'order',
             ));
       }
+      update();
     } catch (e) {
       print('Error: $e');
+      update();
     }
   }
 
   void getTotal() {
-    isLoading.value = true;
-    cartCount.value = 0;
-    cartPrice.value = 0;
+    isLoading =true;
+    cartCount = 0;
+    cartPrice = 0;
     for (var item in cartItems) {
-      cartCount.value += item.quantity;
-      cartPrice.value += int.parse(item.product.price) * item.quantity;
-    }
-    // totalItems = cartItems.length;
-    isLoading.value = false;
+      cartCount += item.quantity;
+      cartPrice += int.parse(item.product.price) * item.quantity;
+    };
+    isLoading =false;
   }
 }

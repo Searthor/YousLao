@@ -47,6 +47,7 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
         centerTitle: true,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
+          // onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back, color: Colors.white),
         ),
       ),
