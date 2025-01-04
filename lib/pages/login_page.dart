@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:yous_app/pages/first_page.dart';
 import 'package:yous_app/pages/home_page.dart';
 import 'package:yous_app/pages/register_page.dart';
 import 'package:yous_app/states/app_colors.dart';
@@ -238,13 +237,12 @@ class _LoginPageState extends State<LoginPage> {
               color: appColors.white,
             ),
             onPressed: () {
-              Navigator.pop(context);
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => FirstPage(),
-              //   ),
-              // );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomePage(),
+                ),
+              );
             },
           ),
           title: Text(
@@ -252,11 +250,10 @@ class _LoginPageState extends State<LoginPage> {
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           )),
       body: Container(
-       
         decoration: BoxDecoration(
-          color: appColors.backgroundColor,
-          borderRadius: BorderRadius.only(topLeft: Radius.circular(10),topRight: Radius.circular(10))
-        ),
+            color: appColors.backgroundColor,
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(10), topRight: Radius.circular(10))),
         child: AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle.light,
           child: GestureDetector(

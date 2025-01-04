@@ -15,7 +15,7 @@ class ProfileState extends GetxController {
   bool isLoading = true;
   ProfileModel? profileModel;
   checkToken() {
-    if (appVerification.token == '') {
+    if (appVerification.token == '' || appVerification.token.isEmpty) {
       profileModel = null;
     } else {
       getProfile();

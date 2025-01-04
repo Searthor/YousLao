@@ -4,70 +4,71 @@ import 'package:get/get.dart';
 import 'package:yous_app/models/product_model.dart';
 import 'package:yous_app/models/repository.dart';
 import 'package:yous_app/models/table_mode.dart';
+import 'package:yous_app/states/table_state.dart';
 
 class ScannerState extends GetxController {
-  var gettabeData = <TableModel>[].obs;
-  var gettabeOrderData = <TableProductModel>[].obs;
-  var isLoading = true.obs;
-  var checkTable = true.obs;
+  List<TableModel> gettabeData =[];
+  List<TableProductModel> gettabeOrderData = [];
+  var isLoading = true;
+  var checkTable = true;
+  var Orderbyme = true;
   Repository repository = Repository();
 
   Future<void> gettablebyqr(String ID) async {
     try {
-      checkTable.value = true;
-      isLoading.value = true;
+      checkTable= true;
+      isLoading= true;
+      Orderbyme= true;
       var res = await repository.get(
-        url: '${repository.urlApi}${repository.Scannertable}$ID',
-        auth: true
-      );
+          url: repository.urlApi + repository.Scannertable + ID, auth: true);
       if (res.statusCode == 200) {
+       print(ID);
+       print(res.body);
         var data = jsonDecode(res.body) as List;
-        gettabeData.value =
-            data.map((json) => TableModel.fromJson(json)).toList();
+        gettabeData =data.map((json) => TableModel.fromJson(json)).toList();
         if (gettabeData[0].status == 2) {
-          gettableOder(gettabeData[0].id);
+          Orderbyme= false;
+          gettableOder(gettabeData[0].id.toString());
+        }else{
+          Orderbyme= false;
+          gettabeOrderData =[];
         }
-        isLoading.value = false;
+        isLoading = false;
       } else if (res.statusCode == 500) {
-        final data = jsonDecode(res.body);
-        print("Response: ${data['message']}");
-        print('---------------------------------------');
-        print('No data found.');
-        print('---------------------------------------');
-        checkTable.value = false;
-        isLoading.value = false;
+        checkTable = false;
+        isLoading = false;
       } else {
-        print('No data found.');
-        isLoading.value = false;
+         Orderbyme= false;
+        isLoading = false;
       }
+      update();
     } catch (e) {
-      isLoading.value = false;
+      isLoading = false;
       print('Failed to fetch data: $e');
+      update();
     }
   }
 
-  Future<void> gettableOder(ID) async {
+  Future<void> gettableOder(String ID) async {
     try {
       var res = await repository.get(
-          url: '${repository.urlApi}${repository.getTableOrder}$ID');
+          url: repository.urlApi + repository.getTableOrder + ID, auth: true);
       if (res.statusCode == 200) {
         var responseBody = jsonDecode(res.body);
         var data = jsonDecode(res.body) as List;
-        gettabeOrderData.value =
+        gettabeOrderData =
             data.map((json) => TableProductModel.fromJson(json)).toList();
-      } else {
-        print('-------------------------------------');
-        print(res.statusCode);
-        print('-------------------------------------');
+        checkTable = false;
       }
+      update();
     } catch (e) {
-      isLoading.value = false;
+      isLoading = false;
       print('Failed to fetch data: $e');
     }
   }
 
   // Method to reset tableModel data
   void resetTableData() {
-    gettabeData.value = [];
+    gettabeData = [];
   }
 }

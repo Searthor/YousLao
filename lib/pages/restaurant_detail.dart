@@ -162,7 +162,7 @@ class _RestaurantDetailState extends State<RestaurantDetail> {
                         padding: EdgeInsets.all(20),
                         child: Center(
                           child: Text(
-                            'there_is_no_food_menu_yet.'.tr,
+                            'there_is_no_food_menu_yet'.tr,
                             style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,

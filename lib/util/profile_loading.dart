@@ -7,7 +7,7 @@ class ProfileLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(10.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 50),
       child: Column(
         children: [
           Center(

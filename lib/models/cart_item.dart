@@ -3,14 +3,14 @@ import 'package:yous_app/models/product_model.dart';
 class CartItem {
   final ProductModel product;
   int tableID;
-  int userID;
-  int quantity;  // Make quantity non-final
+  int quantity; // Make quantity non-final for mutability
+  List<int> details; // Specify the type as List<int>
 
   CartItem({
     required this.product,
     required this.tableID,
-    required this.userID,
     this.quantity = 1,
+    this.details = const [],
   });
 
   factory CartItem.fromJson(Map<String, dynamic> json) {
@@ -18,7 +18,7 @@ class CartItem {
       product: ProductModel.fromJson(json['product']),
       quantity: json['quantity'],
       tableID: json['tableID'],
-      userID: json['userID'],
+      details: List<int>.from(json['details'] ?? []),
     );
   }
 
@@ -28,7 +28,7 @@ class CartItem {
       'quantity': quantity,
       'productId': product.id,
       'table': tableID,
-      'userID': userID,
+      'details': details,
     };
   }
 }

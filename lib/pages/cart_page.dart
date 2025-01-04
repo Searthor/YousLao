@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_state_manager/get_state_manager.dart';
+import 'package:get/get_state_manager/src/simple/get_state.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:yous_app/functions/format_price.dart';
 import 'package:yous_app/models/order_model.dart';
@@ -34,6 +36,7 @@ class _CartPageState extends State<CartPage> {
     super.initState();
     cartController.getTotal();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,23 +61,23 @@ class _CartPageState extends State<CartPage> {
       ),
       body: Container(
         decoration: BoxDecoration(
-          color: appColors.backgroundColor,
-          borderRadius: BorderRadius.only(topLeft: Radius.circular(10),topRight: Radius.circular(10))
-        ),
-        child: Obx(() {
-          if (cartController.isLoading.value) {
+            color: appColors.backgroundColor,
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(10), topRight: Radius.circular(10))),
+        child: GetBuilder<CartController>(builder: (get) {
+          if (get.isLoading) {
             return Text("data");
-          } else if (cartController.cartItems.isEmpty ) {
+          } else if (get.cartItems.isEmpty) {
             return Center(child: Text('not_found_product_in_cart'.tr));
           } else {
             return ListView.builder(
               // separatorBuilder: (context, index) => const SizedBox(height: 20),
-              itemCount: cartController.cartItems.length,
+              itemCount: get.cartItems.length,
               itemBuilder: (context, index) {
-                final cartItem = cartController.cartItems[index];
-                final userID = cartItem.userID;
+                final cartItem = get.cartItems[index];
                 final tableID = cartItem.tableID;
                 final item = cartItem.product;
+                final detail = cartItem.details;
                 return Column(
                   children: [
                     SizedBox(height: 5),
@@ -232,14 +235,14 @@ class _CartPageState extends State<CartPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Obx(() {
-              if (cartController.isLoading.value) {
+            GetBuilder<CartController>(builder: (get) {
+              if (get.isLoading) {
                 return Text("data");
               } else {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                     Text(
+                    Text(
                       "amount".tr,
                       style: TextStyle(
                         fontSize: 16,
@@ -248,7 +251,7 @@ class _CartPageState extends State<CartPage> {
                       ),
                     ),
                     Text(
-                      cartController.cartCount.toString() + 'item',
+                      get.cartCount.toString() + 'item',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -262,12 +265,12 @@ class _CartPageState extends State<CartPage> {
             const SizedBox(height: 10),
             const Divider(),
             const SizedBox(height: 10),
-            Obx(() {
-              if (cartController.isLoading.value) {
+            GetBuilder<CartController>(builder: (get) {
+              if (get.isLoading) {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                     Text(
+                    Text(
                       "sum_total".tr,
                       style: TextStyle(
                         fontSize: 18,
@@ -275,7 +278,7 @@ class _CartPageState extends State<CartPage> {
                       ),
                     ),
                     Text(
-                      '${FormatPrice(price: num.parse(cartController.cartPrice.toString() ?? '0'))} LAK',
+                      '${FormatPrice(price: num.parse(get.cartPrice.toString() ?? '0'))} LAK',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -287,7 +290,7 @@ class _CartPageState extends State<CartPage> {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                     Text(
+                    Text(
                       "total".tr,
                       style: TextStyle(
                         fontSize: 18,
@@ -295,7 +298,7 @@ class _CartPageState extends State<CartPage> {
                       ),
                     ),
                     Text(
-                      '${FormatPrice(price: num.parse(cartController.cartPrice.toString() ?? '0'))} LAK',
+                      '${FormatPrice(price: num.parse(get.cartPrice.toString() ?? '0'))} LAK',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -306,41 +309,33 @@ class _CartPageState extends State<CartPage> {
               }
             }),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                if (cartController.cartItems.isEmpty) {
-                  // Show a message if tableID is null or cartItems is empty
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('please_choose_a_meal_first'.tr),
-                      duration:
-                          Duration(seconds: 2), // Duration for the message
-                    ),
-                  );
-                  return; // Exit the method
-                }
+            GetBuilder<CartController>(builder: (get) {
+              return ElevatedButton(
+                onPressed: cartController.cartItems.length > 0
+                    ? () {
+                        OrderModel orderModel = OrderModel(
+                          userID: 0,
+                          tableId: widget.tableID,
+                          cartList: cartController.cartItems,
+                        );
 
-                OrderModel orderModel = OrderModel(
-                  userID: 0,
-                  tableId: widget.tableID,
-                  cartList: cartController.cartItems,
-                );
-
-                cartController.createOrder(orderModel);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: appColors.mainColor,
-                minimumSize: const Size(double.infinity, 55),
-              ),
-              child: Text(
-                "confirm".tr,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                        cartController.createOrder(orderModel);
+                      }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: appColors.mainColor,
+                  minimumSize: const Size(double.infinity, 55),
                 ),
-              ),
-            ),
+                child: Text(
+                  "confirm".tr,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              );
+            })
           ],
         ),
       ),

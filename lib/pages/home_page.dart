@@ -1,12 +1,17 @@
 // pages/home_page.dart
 import 'package:flutter/material.dart';
+import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:yous_app/models/AllRestaurant_model.dart';
 import 'package:yous_app/models/repository.dart';
+import 'package:yous_app/pages/profile_page.dart';
+import 'package:yous_app/pages/qrscanner.dart';
 import 'package:yous_app/pages/restaurant_detail.dart';
 import 'package:yous_app/pages/setting_lan_page.dart';
 import 'package:yous_app/states/app_colors.dart';
+import 'package:yous_app/states/app_verification.dart';
 import 'package:yous_app/states/restaurant_states.dart';
 import 'package:yous_app/states/slide_controller.dart';
+import 'package:yous_app/util/buildNavItem.dart';
 import 'package:yous_app/util/restaurants.dart';
 import 'package:yous_app/util/review_food.dart';
 import 'package:get/get.dart';
@@ -25,13 +30,14 @@ class _HomePageState extends State<HomePage> {
   int currentSlide = 0;
   RestaurantState restaurantState = Get.put(RestaurantState());
   SlideController slideController = Get.put(SlideController());
-  Repository repository = Repository();
+  AppVerification appVerification = Get.put(AppVerification());
   @override
   void initState() {
     super.initState();
+    appVerification.setInitToken();
     restaurantState.fetchRestaurants();
     slideController.getSlides();
-    repository.appVerification.setInitToken();
+    
   }
 
   @override
@@ -89,6 +95,64 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: Container(
+        height: 56.0,
+        width: 56.0,
+        decoration: BoxDecoration(
+          color: appColors.mainColor,
+          border: Border.all(color: Colors.white, width: 3.0),
+          shape: BoxShape.circle,
+        ),
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Qrscanner()),
+            );
+          },
+          backgroundColor: Color.fromARGB(0, 235, 17, 17),
+          elevation: 0,
+          child: Icon(
+            Icons.qr_code_scanner,
+            size: 32,
+            color: Colors.white,
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        notchMargin: 5.0,
+        shape: CircularNotchedRectangle(),
+        color: appColors.mainColor,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Row(
+              children: [
+                BuildNavItem(
+                  icon: Icons.home,
+                  label: 'home'.tr,
+                ),
+                BuildNavItem(icon: Icons.reviews, label: 'review'.tr),
+              ],
+            ),
+            Row(
+              children: [
+                BuildNavItem(
+                  icon: Icons.person,
+                  label: 'me'.tr,
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => ProfilePage()));
+                  },
+                ),
+                BuildNavItem(icon: Icons.help, label: 'report'.tr),
+              ],
+            ),
+          ],
+        ),
       ),
       body: Container(
         width: double.infinity,
@@ -153,9 +217,9 @@ class _HomePageState extends State<HomePage> {
                   height: 10,
                 ),
                 // List of restaurants
-                Obx(
-                  () {
-                    if (restaurantState.isLoading.value) {
+                GetBuilder<RestaurantState>(
+                  builder: (get) {
+                    if (get.isLoading) {
                       return Column(
                         children: [
                           Center(
@@ -221,9 +285,9 @@ class _HomePageState extends State<HomePage> {
                       return ListView.builder(
                         physics: NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
-                        itemCount: restaurantState.restaurants.length,
+                        itemCount: get.restaurants.length,
                         itemBuilder: (context, index) {
-                          final restaurant = restaurantState.restaurants[index];
+                          final restaurant = get.restaurants[index];
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 10.0),
                             child: GestureDetector(

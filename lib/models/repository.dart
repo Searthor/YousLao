@@ -10,9 +10,10 @@ import 'package:yous_app/states/app_colors.dart';
 import 'package:yous_app/states/app_verification.dart';
 import 'package:yous_app/widgets/custom_dialog.dart';
 export 'dart:convert';
+
 class Repository {
-  String urlApi = 'http://192.168.1.36:8000/';
-  // String urlApi = 'https://demo.youhotel.la/';
+  // String urlApi = 'http://192.168.1.28:8000/';
+  String urlApi = 'https://demo.youhotel.la/';
   String allrestaurant = 'api/Restaurants';
   String getRestaurantDetail = 'api/getRestaurantdetail/';
   String getRestaurantmenu = 'api/Restaurants_menu_list/';
@@ -27,10 +28,12 @@ class Repository {
   String gethistorys = 'api/historys';
   String gethistorysid = 'api/historys/';
   String updateProfile = 'api/updateProfile';
+  String Checkorder = 'api/Checkorder/';
+  String getMenuNote = 'api/getMenuNote/';
   AppVerification appVerification = Get.put(AppVerification());
   AppColors appColors = AppColors();
 
-  Future<http.Response> get(
+ Future<http.Response> get(
       {required String url, Map<String, String>? header, bool? auth}) async {
     try {
       var res = await http
@@ -47,13 +50,13 @@ class Repository {
       });
       if (res.statusCode == 401 || res.statusCode == 408) {
         appVerification.removeToken();
-        Get.offAll(() => LoginPage());
+        Get.offAll(() => const LoginPage());
         return res;
       } else if (res.statusCode == 408) {
         appVerification.removeToken();
-        Get.offAll(() => LoginPage());
+        Get.offAll(() => const LoginPage());
         CustomDialog().showToast(
-            backgroundColor: appColors.mainColor,
+            backgroundColor: AppColors().mainColor.withOpacity(0.5),
             text: 'Connect Internet Error');
         return res;
       }
@@ -64,6 +67,7 @@ class Repository {
       return http.Response("error", 503);
     }
   }
+
 
   Future<http.Response> post(
       {required String url,
@@ -86,7 +90,7 @@ class Repository {
       });
       if (res.statusCode == 401) {
         // appVerification.storage.erase();
-       Get.offAll(() => LoginPage());
+        Get.offAll(() => LoginPage());
         return res;
       }
       return res;
@@ -97,8 +101,7 @@ class Repository {
     }
   }
 
-
-    Future<http.Response> postMultiPart(
+  Future<http.Response> postMultiPart(
       {required String url,
       Map<String, String>? header,
       bool? auth,
